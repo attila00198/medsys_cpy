@@ -1,4 +1,4 @@
-const API = "api/persones.php";
+const API = "/api/index.php";
 
 // Az alkalmassági vizsgálat ennyi napig érvényes a kezdő dátumtól
 const VALIDITY_DAYS = 30;
@@ -19,18 +19,30 @@ document.addEventListener("DOMContentLoaded", () => {
 // ── ADATOK BETÖLTÉSE ─────────────────────────────────────
 async function loadData() {
   try {
-    const res = await fetch(API);
+    const res = await fetch(`${API}`, {
+      method: "GET",
+      cache: "no-cache",
+      headers: {
+        "Content-Type": "application/json"
+      },
+    });
     const json = await res.json();
 
     if (!json.ok) throw new Error(json.error);
 
-    allData = json.data;
+    const payload = json.data;
+    allData = Array.isArray(payload)
+      ? payload
+      : payload
+        ? [payload]
+        : [];
+
     renderTable(allData);
     renderStats(allData);
   } catch (err) {
     console.error("Hiba az adatok betöltésekor:", err.message);
     document.querySelector("tbody").innerHTML =
-      `<tr><td colspan="5">Hiba: ${err.message}</td></tr>`;
+      `<tr><td colspan="9">Hiba: ${err.message}</td></tr>`;
   }
 }
 

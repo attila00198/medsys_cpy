@@ -1,9 +1,13 @@
 <?php
+include_once(__DIR__ . "/../database/database.php");
+
+$dbFile = __DIR__ . "/../database/medsys.db";
+$db = init_db($dbFile);
+
 header("Content-Type: application/json; charset=utf-8");
-header("Access-Control-Allow-Origin: *");
 
 // ── MINTA ADATOK (később SQLite lekérdezésre cserélve) ──────────
-$persones = [
+/* $persones = [
     [
         "id" => 1,
         "nev" => "Kovács Béla",
@@ -48,30 +52,41 @@ $persones = [
         "pszichologiai_kezdete" => null,
         "megjegyzes" => "Pszichológiai vizsgálatra beosztva: 2026.07.01.",
     ],
-];
+]; */
+
+// ── Insert dummy data ────────────────────────────────────
+/* foreach ($persones as $person) {
+    db_insert("persones", $person);
+}; */
+
 
 // ── ROUTING ──────────────────────────────────────────────────────
 $method = $_SERVER["REQUEST_METHOD"];
+$query = parse_url($_SERVER["REQUEST_URI"], PHP_URL_QUERY);
 
 if ($method === "GET") {
     if (isset($_GET["id"])) {
         $id = (int) $_GET["id"];
-        $found = array_values(
-            array_filter($persones, fn($p) => $p["id"] === $id),
-        );
-
-        if (!$found) {
+        $stmt = $db->prepare("SELECT * FROM persones WHERE id = :id");
+        $stmt->bindValue(":id", $id, SQLITE3_INTEGER);
+        $result = $stmt->execute();
+        if ($result === false) {
             http_response_code(404);
-            echo json_encode(["ok" => false, "error" => "Nem található"]);
+            echo json_encode(["ok" => false, "error" => "Person not found"]);
             exit();
         }
-        echo json_encode(["ok" => true, "data" => $found[0]]);
+        $person = $result->fetchArray(SQLITE3_ASSOC);
+        echo json_encode(["ok" => true, "data" => $person]);
+    } else {
+        $stmt = $db->prepare("SELECT * FROM persones");
+        $result = $stmt->execute();
+        $persones = [];
+        while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+            $persones[] = $row;
+        }
+        echo json_encode(["ok" => true, "data" => $persones]);
         exit();
     }
-
-    echo json_encode(["ok" => true, "data" => $persones]);
-    exit();
+} else if ($method === "POST") {
+    // Handle POST request to insert new person
 }
-
-http_response_code(405);
-echo json_encode(["ok" => false, "error" => "Method not allowed"]);

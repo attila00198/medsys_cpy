@@ -1,88 +1,71 @@
 <!doctype html>
 <html lang="hu">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>MedSys Dashboard</title>
-        <link rel="stylesheet" href="static/css/style.css" />
-    </head>
 
-    <body>
-        <header>
-            <h1>MedSys</h1>
-            <p>Orvosi és pszichológiai alkalmassági nyilvántartás</p>
-        </header>
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MedSys Dashboard</title>
+    <link rel="stylesheet" href="static/css/style.css" />
+</head>
 
-        <main>
-            <section class="dashboard">
-                <div class="card">
-                    <h2>Összes személy</h2>
-                    <span>128</span>
-                </div>
+<body>
+    <header>
+        <h1>MedSys</h1>
+        <p>Orvosi és pszichológiai alkalmassági nyilvántartás</p>
+    </header>
 
-                <div class="card">
-                    <h2>Érvényes orvosi</h2>
-                    <span>103</span>
-                </div>
+    <main>
+        <section class="dashboard">
+            <div class="card">
+                <h2>Összes személy</h2>
+                <span>0</span>
+            </div>
 
-                <div class="card">
-                    <h2>Lejárt orvosi</h2>
-                    <span>25</span>
-                </div>
+            <div class="card">
+                <h2>Érvényes orvosi</h2>
+                <span>0</span>
+            </div>
 
-                <div class="card">
-                    <h2>Lejárt pszichológiai</h2>
-                    <span>17</span>
-                </div>
-            </section>
+            <div class="card">
+                <h2>Lejárt orvosi</h2>
+                <span>0</span>
+            </div>
 
-            <section class="toolbar">
-                <input
-                    type="text"
-                    placeholder="Keresés név vagy TAJ alapján..."
-                />
+            <div class="card">
+                <h2>Lejárt pszichológiai</h2>
+                <span>0</span>
+            </div>
+        </section>
 
-                <button>Új személy</button>
-            </section>
+        <section class="toolbar">
+            <input type="text" placeholder="Keresés név vagy TAJ alapján..." />
 
-            <section>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Név</th>
-                            <th>TAJ</th>
-                            <th>Orvosi</th>
-                            <th>Pszichológiai</th>
-                            <th>Állapot</th>
-                        </tr>
-                    </thead>
+            <button>Új személy</button>
+        </section>
 
-                    <tbody>
-                        <tr>
-                            <td>Kovács Béla</td>
-                            <td>123-456-789</td>
-                            <td>2026-05-15</td>
-                            <td>2026-05-12</td>
-                            <td>
-                                <span class="status valid">Érvényes</span>
-                            </td>
-                        </tr>
+        <section>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Név</th>
+                        <th>Születési idő</th>
+                        <th>TAJ</th>
+                        <th>Orvosi</th>
+                        <th>Orvosi kezdete</th>
+                        <th>Pszichológiai</th>
+                        <th>Pszichológiai kezdete</th>
+                        <th>Megjegyzés</th>
+                        <th>Állapot</th>
+                    </tr>
+                </thead>
 
-                        <tr>
-                            <td>Nagy Anna</td>
-                            <td>987-654-321</td>
-                            <td>2026-03-01</td>
-                            <td>2026-05-20</td>
-                            <td>
-                                <span class="status expired">Lejárt</span>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </section>
-        </main>
+                <tbody></tbody>
+            </table>
+        </section>
+    </main>
 
-        <script src="static/js/api.js"></script>
-        <script src="static/js/table.js"></script>
-    </body>
+    <script src="static/js/api.js"></script>
+    <script src="static/js/table.js"></script>
+</body>
+
 </html>
