@@ -6,58 +6,39 @@ $db = init_db($dbFile);
 
 header("Content-Type: application/json; charset=utf-8");
 
-// ── MINTA ADATOK (később SQLite lekérdezésre cserélve) ──────────
-/* $persones = [
-    [
-        "id" => 1,
-        "nev" => "Kovács Béla",
-        "szuletesi_ido" => "1992-04-11",
-        "taj_szam" => "123456789",
-        "orvosi_alkalmas" => 1,
-        "orvosi_kezdete" => "2026-05-20",
-        "pszichologiai_alkalmas" => 1,
-        "pszichologiai_kezdete" => "2026-05-22",
-        "megjegyzes" => "",
-    ],
-    [
-        "id" => 2,
-        "nev" => "Nagy Anna",
-        "szuletesi_ido" => "1988-09-23",
-        "taj_szam" => "987654321",
-        "orvosi_alkalmas" => 1,
-        "orvosi_kezdete" => "2025-03-01",
-        "pszichologiai_alkalmas" => 1,
-        "pszichologiai_kezdete" => "2026-05-20",
-        "megjegyzes" => "Soron kívüli felülvizsgálat szükséges",
-    ],
-    [
-        "id" => 3,
-        "nev" => "Tóth Eszter",
-        "szuletesi_ido" => "1995-12-02",
-        "taj_szam" => "111222333",
-        "orvosi_alkalmas" => 0,
-        "orvosi_kezdete" => null,
-        "pszichologiai_alkalmas" => 1,
-        "pszichologiai_kezdete" => "2026-01-10",
-        "megjegyzes" => "",
-    ],
-    [
-        "id" => 4,
-        "nev" => "Szabó Dávid",
-        "szuletesi_ido" => "1990-07-30",
-        "taj_szam" => "444555666",
-        "orvosi_alkalmas" => 1,
-        "orvosi_kezdete" => "2026-04-01",
-        "pszichologiai_alkalmas" => 0,
-        "pszichologiai_kezdete" => null,
-        "megjegyzes" => "Pszichológiai vizsgálatra beosztva: 2026.07.01.",
-    ],
-]; */
-
 // ── Insert dummy data ────────────────────────────────────
-/* foreach ($persones as $person) {
-    db_insert("persones", $person);
-}; */
+$dummyData = [
+    [
+        "nev" => "Kovács Péter",
+        "szuletesi_ido" => "1985-03-15",
+        "taj_szam" => "123456789",
+        "orvosi_kezdete" => "2020-01-01",
+        "pszichologiai_kezdete" => "2021-06-15",
+        "megjegyzes" => "Nincs megjegyzés"
+    ],
+    [
+        "nev" => "Nagy Anna",
+        "szuletesi_ido" => "1990-07-22",
+        "taj_szam" => "987654321",
+        "orvosi_kezdete" => "2019-05-10",
+        "pszichologiai_kezdete" => "2020-11-20",
+        "megjegyzes" => "Allergiás a penicillinre"
+    ],
+    [
+        "nev" => "Tóth László",
+        "szuletesi_ido" => "1978-12-05",
+        "taj_szam" => "456789123",
+        "orvosi_kezdete" => "2018-03-25",
+        "pszichologiai_kezdete" => null,
+        "megjegyzes" => null
+    ]
+];
+// Insert dummy data only if the table is empty
+/* if (empty(db_getAll($db, "persones"))) {
+    foreach ($dummyData as $person) {
+        db_insert($db, "persones", $person);
+    }
+} */
 
 
 // ── ROUTING ──────────────────────────────────────────────────────
