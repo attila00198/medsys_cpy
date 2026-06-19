@@ -122,7 +122,25 @@ function renderProfile(person) {
 }
 
 function renderForm() {
-  return h1("Work in progress.");
+  return section(
+    form(
+      div(
+        label("Teljes néve:").setTarget("name").addClass("input-group-text"),
+        input().setPlaceholder("Néve").setId("name").setName("name").addClass("form-control")
+      ).setClasses("input-group", "mb-2", "p-2"),
+      div(
+        label("Születési Dátum:").setTarget("birth-date").addClass("input-group-text"),
+        input("date").setId("birth-date").setName("birth-date").addClass("form-control")
+      ).setClasses("input-group", "mb-2", "p-2"),
+      div(
+        label("Taj szám:").setTarget("taj-number").addClass("input-group-text"),
+        input("number").setId("taj-number").setName("taj-number").addClass("form-control")
+      ).setClasses("input-group", "mb-2", "p-2"),
+      div(
+        input("submit").setId("create-entry").setName("create-entry").setValue("Küldés").setClasses("btn", "btn-success")
+      ).setClasses("mb-2", "p-2", "float-end"),
+    ).addClass("col-8").setId("new-person-form")
+  )
 }
 
 // ── KERESÉS FUNKCIÓ ─────────────────────────────────────
@@ -142,6 +160,17 @@ if (window.location.pathname.endsWith("edit.html")) {
   if (!personId) {
     mainContainer.innerHTML = "";
     mainContainer.appendChild(renderForm());
+
+    document.getElementById("new-person-form").addEventListener("submit", (event) => {
+      event.preventDefault();
+      const formData = new FormData(event.target);
+      const name = formData.get("name")
+      const birth_date = formData.get("birth-date")
+      const taj_number = formData.get("taj-number")
+      console.log(name);
+      console.log(birth_date);
+      console.log(formatTajSzam(taj_number));
+    });
   } else {
     loadData().then(() => {
       const person = allData.find(p => p.id === Number(personId));

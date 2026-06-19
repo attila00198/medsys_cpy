@@ -7,7 +7,7 @@ $db = init_db($dbFile);
 header("Content-Type: application/json; charset=utf-8");
 
 // ── Insert dummy data ────────────────────────────────────
-$dummyData = [
+/* $dummyData = [
     [
         "nev" => "Kovács Péter",
         "szuletesi_ido" => "1985-03-15",
@@ -32,7 +32,7 @@ $dummyData = [
         "pszichologiai_kezdete" => null,
         "megjegyzes" => null
     ]
-];
+]; */
 // Insert dummy data only if the table is empty
 /* if (empty(db_getAll($db, "persones"))) {
     foreach ($dummyData as $person) {
