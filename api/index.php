@@ -43,7 +43,6 @@ header("Content-Type: application/json; charset=utf-8");
 
 // ── ROUTING ──────────────────────────────────────────────────────
 $method = $_SERVER["REQUEST_METHOD"];
-$query = parse_url($_SERVER["REQUEST_URI"], PHP_URL_QUERY);
 
 if ($method === "GET") {
     if (isset($_GET["id"])) {
@@ -69,5 +68,72 @@ if ($method === "GET") {
         exit();
     }
 } else if ($method === "POST") {
-    // Handle POST request to insert new person
+    $body = json_decode(file_get_contents("php://input"), true);
+    if (!$body) {
+        http_response_code(400);
+        echo json_encode(["ok" => false, "error" => "Érvénytelen kérés törzs."]);
+        exit();
+    }
+
+    $stmt = $db->prepare("
+        INSERT INTO persones (nev, szuletesi_ido, taj_szam, orvosi_kezdete, pszichologiai_kezdete, megjegyzes)
+        VALUES (:nev, :szuletesi_ido, :taj_szam, :orvosi_kezdete, :pszichologiai_kezdete, :megjegyzes)
+    ");
+    $stmt->bindValue(":nev",                    $body["nev"]                    ?? null);
+    $stmt->bindValue(":szuletesi_ido",          $body["szuletesi_ido"]          ?? null);
+    $stmt->bindValue(":taj_szam",               $body["taj_szam"]               ?? null);
+    $stmt->bindValue(":orvosi_kezdete",         $body["orvosi_kezdete"]         ?? null);
+    $stmt->bindValue(":pszichologiai_kezdete",  $body["pszichologiai_kezdete"]  ?? null);
+    $stmt->bindValue(":megjegyzes",             $body["megjegyzes"]             ?? null);
+
+    $result = $stmt->execute();
+    if (!$result) {
+        http_response_code(500);
+        echo json_encode(["ok" => false, "error" => "Mentés sikertelen."]);
+        exit();
+    }
+
+    $newId = $db->lastInsertRowID();
+    echo json_encode(["ok" => true, "id" => $newId]);
+} else if ($method === "PUT") {
+    $id = isset($_GET["id"]) ? (int) $_GET["id"] : null;
+    if (!$id) {
+        http_response_code(400);
+        echo json_encode(["ok" => false, "error" => "Hiányzó azonosító."]);
+        exit();
+    }
+
+    $body = json_decode(file_get_contents("php://input"), true);
+    if (!$body) {
+        http_response_code(400);
+        echo json_encode(["ok" => false, "error" => "Érvénytelen kérés törzs."]);
+        exit();
+    }
+
+    $stmt = $db->prepare("
+        UPDATE persones SET
+            nev = :nev,
+            szuletesi_ido = :szuletesi_ido,
+            taj_szam = :taj_szam,
+            orvosi_kezdete = :orvosi_kezdete,
+            pszichologiai_kezdete = :pszichologiai_kezdete,
+            megjegyzes = :megjegyzes
+        WHERE id = :id
+    ");
+    $stmt->bindValue(":nev",                    $body["nev"]                    ?? null);
+    $stmt->bindValue(":szuletesi_ido",          $body["szuletesi_ido"]          ?? null);
+    $stmt->bindValue(":taj_szam",               $body["taj_szam"]               ?? null);
+    $stmt->bindValue(":orvosi_kezdete",         $body["orvosi_kezdete"]         ?? null);
+    $stmt->bindValue(":pszichologiai_kezdete",  $body["pszichologiai_kezdete"]  ?? null);
+    $stmt->bindValue(":megjegyzes",             $body["megjegyzes"]             ?? null);
+    $stmt->bindValue(":id", $id, SQLITE3_INTEGER);
+
+    $result = $stmt->execute();
+    if (!$result) {
+        http_response_code(500);
+        echo json_encode(["ok" => false, "error" => "Mentés sikertelen."]);
+        exit();
+    }
+
+    echo json_encode(["ok" => true]);
 }

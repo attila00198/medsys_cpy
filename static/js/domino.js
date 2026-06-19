@@ -289,7 +289,7 @@ function basicRouter(routes, container, defaultRoute = "home") {
     }
 
     const renderRoute = () => {
-        const path = window.location.hash.slice(1) || defaultRoute
+        const path = (window.location.hash.slice(1).split("?")[0]) || defaultRoute
         const pageFunction = routes[path]
 
         // Clear container
