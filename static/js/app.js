@@ -35,14 +35,13 @@ async function loadData() {
 // ── ÉRVÉNYESSÉG VIZSGÁLATA ─────────────────────────────
 function checkValidity(dateString) {
   if (!dateString) return false;
-
   const date = new Date(dateString);
   if (Number.isNaN(date.getTime())) return false;
 
   const now = new Date();
-  const diffTime = Math.abs(now - date);
+  const diffTime = now - date; // nem abs! negatív = jövőbeli dátum
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  return diffDays <= VALIDITY_DAYS;
+  return diffDays >= 0 && diffDays <= VALIDITY_DAYS;
 }
 
 function formatTajSzam(szam) {
