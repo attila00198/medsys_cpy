@@ -2,7 +2,7 @@
 
 class Router
 {
-    public function __construct(private Sqlite3 $db)
+    public function __construct(private Database $db)
     {
         $this->db = $db;
     }

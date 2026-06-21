@@ -1,59 +1,31 @@
 <?php
-function init_db(string $dbFile)
+
+class Database
 {
-    $db = new SQLite3($dbFile);
+    private SQLite3 $db;
 
-    $db->exec("PRAGMA foreign_keys = ON");
+    public function __construct(string $dbFile, string $schema = "")
+    {
+        $this->db = new SQLite3($dbFile);
+        $this->db->exec("PRAGMA foreign_keys = ON");
 
-    $schema = file_get_contents(__DIR__ . "/init.sql");
-
-    $db->exec($schema);
-
-    return $db;
-}
-
-function db_insert($db, $table, $data)
-{
-    $columns = implode(", ", array_keys($data));
-    $placeholders = ":" . implode(", :", array_keys($data));
-    $stmt = $db->prepare("INSERT INTO $table ($columns) VALUES ($placeholders)");
-    foreach ($data as $key => $value) {
-        $stmt->bindValue(":$key", $value);
+        if ($schema !== "" && file_exists($schema)) {
+            $this->db->exec(file_get_contents($schema));
+        }
     }
-    return $stmt->execute();
-}
 
-function db_getAll($db, $table)
-{
-    $result = $db->query("SELECT * FROM $table");
-    $rows = [];
-    while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
-        $rows[] = $row;
+    public function prepare(string $query)
+    {
+        return $this->db->prepare($query);
     }
-    return $rows;
-}
 
-function db_get_by_id($db, $table, $id)
-{
-    $stmt = $db->prepare("SELECT * FROM $table WHERE id = :id");
-    $stmt->bindValue(":id", $id, SQLITE3_INTEGER);
-
-    $result = $stmt->execute();
-
-    return $result->fetchArray(SQLITE3_ASSOC);
-}
-
-function db_update($db, $table, $id, $data)
-{
-    $set = [];
-    foreach ($data as $key => $value) {
-        $set[] = "$key = :$key";
+    public function query(string $query)
+    {
+        return $this->db->query($query);
     }
-    $set = implode(", ", $set);
-    $stmt = $db->prepare("UPDATE $table SET $set WHERE id = :id");
-    $stmt->bindValue(":id", $id);
-    foreach ($data as $key => $value) {
-        $stmt->bindValue(":$key", $value);
+
+    public function lastInsertRowID()
+    {
+        return $this->db->lastInsertRowID();
     }
-    return $stmt->execute();
 }
