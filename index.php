@@ -1,3 +1,5 @@
+<?php require_once "./src/app.php" ?>
+
 <!doctype html>
 <html lang="hu" data-bs-theme="dark">
 
@@ -17,9 +19,7 @@
         <p>Orvosi és pszichológiai alkalmassági nyilvántartás</p>
     </header>
 
-    <main id="app">
-        <!-- Az alkalmazás ide renderelődik -->
-    </main>
+    <main id="app"></main>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"

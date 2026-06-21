@@ -1,10 +1,19 @@
 <?php
-include_once(__DIR__ . "/../database/database.php");
 
-$dbFile = __DIR__ . "/../database/medsys.db";
-$db = init_db($dbFile);
+// Includes
+require_once(__DIR__ . "/router.php");
+require_once(__DIR__ . "/database/database.php");
+require_once(__DIR__ . "/controller/PersoneController.php");
 
-header("Content-Type: application/json; charset=utf-8");
+// Init
+$dbFile = __DIR__ . "/database/medsys.db";
+$db     = init_db($dbFile);
+
+$method = $_SERVER["REQUEST_METHOD"];
+$path   = parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH);
+
+$router = new Router($db);
+$router->dispatch($method, $path);
 
 // ── Insert dummy data ────────────────────────────────────
 /* $dummyData = [
@@ -42,9 +51,8 @@ header("Content-Type: application/json; charset=utf-8");
 
 
 // ── ROUTING ──────────────────────────────────────────────────────
-$method = $_SERVER["REQUEST_METHOD"];
 
-if ($method === "GET") {
+/* if ($method === "GET") {
     if (isset($_GET["id"])) {
         $id = (int) $_GET["id"];
         $stmt = $db->prepare("SELECT * FROM persones WHERE id = :id");
@@ -136,4 +144,4 @@ if ($method === "GET") {
     }
 
     echo json_encode(["ok" => true]);
-}
+} */

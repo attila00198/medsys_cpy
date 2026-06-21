@@ -1,4 +1,4 @@
-const API = "/api/index.php";
+const API = "/api/person";
 
 // Az alkalmassági vizsgálat ennyi napig érvényes a kezdő dátumtól
 const VALIDITY_DAYS = 30;
@@ -10,7 +10,6 @@ async function loadData() {
   try {
     const res = await fetch(API, {
       method: "GET",
-      cache: "no-cache",
       headers: { "Content-Type": "application/json" },
     });
     const json = await res.json();
