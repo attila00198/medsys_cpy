@@ -14,8 +14,8 @@ $db         = new Database($dbFile, $dbSchema);
 $method     = $_SERVER["REQUEST_METHOD"];
 $path       = parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH);
 
-$personService = new PersonService($db);
-$personController = new PersonController($personService);
+$personService      = new PersonService($db);
+$personController   = new PersonController($personService);
 
 $router     = new Router($personController);
 $router->dispatch($method, $path);
