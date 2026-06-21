@@ -4,6 +4,7 @@
 require_once(__DIR__ . "/router.php");
 require_once(__DIR__ . "/database/database.php");
 require_once(__DIR__ . "/controller/PersoneController.php");
+require_once(__DIR__ . "/service/personeService.php");
 
 // Init
 $dbFile     = __DIR__ . "/database/medsys.db";

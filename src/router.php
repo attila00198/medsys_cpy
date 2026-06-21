@@ -2,25 +2,46 @@
 
 class Router
 {
+    private PersoneController $personeController;
     public function __construct(private Database $db)
     {
         $this->db = $db;
+        $this->personeController = new PersoneController($db);
     }
 
     public function dispatch(string $method, string $url)
     {
+        if ($url !== "/api/person") {
+            return;
+        }
+
+        switch ($method) {
+            case "GET":
+                $this->personeController->get();
+                break;
+            case "POST":
+                $this->personeController->create();
+                break;
+            case "PUT":
+                $this->personeController->update();
+                break;
+            default:
+                throw new Exception("Method not supported.");
+        }
+    }
+
+    /* public function dispatch(string $method, string $url)
+    {
         if ($url === "/api/person") {
             if ($method === "GET") {
                 if (!isset($_GET["id"])) {
-                    $pc = new PersoneController($this->db);
-                    $data = $pc->get_all_persone();
+                    $data = $this->personeController->getAll();
 
                     header("Content-Type: application/json");
                     echo $this->json(["ok" => true, "data" => $data]);
                     exit(0);
                 }
-                $pc = new PersoneController($this->db);
-                $data = $pc->get_persone_by_id($_GET["id"]);
+                $data = $this->personeController->getById($_GET["id"]);
 
                 header("Content-Type: application/json");
                 echo $this->json(["ok" => true, "data" => $data]);
@@ -40,8 +61,7 @@ class Router
                 }
 
 
-                $pc = new PersoneController($this->db);
-                if (!$pc->update_person($_GET["id"], $body)) {
+                if (!$this->personeController->update($_GET["id"], $body)) {
                     http_response_code(400);
                     echo $this->json(["ok" => false, "message" => "Something went wrong."]);
                     exit(1);
@@ -57,14 +77,13 @@ class Router
                 }
 
 
-                $pc = new PersoneController($this->db);
-                $id = $pc->add_person($body);
+                $id = $this->personeController->create($body);
 
                 echo $this->json(["ok" => true, "id" => $id]);
                 exit(0);
             }
         }
-    }
+    } */
     private function json(array $data)
     {
         return json_encode($data);
