@@ -1,6 +1,6 @@
 <?php
 
-class PersoneController
+class PersonController
 {
     public function __construct(private Database $db)
     {

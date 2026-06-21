@@ -2,11 +2,9 @@
 
 class Router
 {
-    private PersoneController $personeController;
-    public function __construct(private Database $db)
+    public function __construct(private PersonController $personController)
     {
-        $this->db = $db;
-        $this->personeController = new PersoneController($db);
+        $this->personController = $personController;
     }
 
     public function dispatch(string $method, string $url)
@@ -17,13 +15,13 @@ class Router
 
         switch ($method) {
             case "GET":
-                $this->personeController->get();
+                $this->personController->get();
                 break;
             case "POST":
-                $this->personeController->create();
+                $this->personController->create();
                 break;
             case "PUT":
-                $this->personeController->update();
+                $this->personController->update();
                 break;
             default:
                 throw new Exception("Method not supported.");
