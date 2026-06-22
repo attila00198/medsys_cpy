@@ -15,7 +15,7 @@ class PersonController
             exit;
         }
         $id = $_GET["id"];
-        $data = $this->personService->getPerson($id);
+        $data = $this->personService->getPerson((int) $id);
         echo json_encode(["ok" => true, "data" => $data]);
         exit;
     }
@@ -38,11 +38,12 @@ class PersonController
     public function update()
     {
         if (!isset($_GET["id"])) {
+            http_response_code(400);
             echo json_encode(["ok" => false, "error" => "Missing id"]);
             exit;
         }
 
-        $id = $_GET["id"];
+        $id = (int) $_GET["id"];
         $data = json_decode(file_get_contents("php://input"), true);
         if (!$data) {
             http_response_code(400);
@@ -53,6 +54,7 @@ class PersonController
         if (!$this->personService->updatePerson($id, $data)) {
             http_response_code(400);
             echo json_encode(["ok" => false, "error" => "Could not save person"]);
+            exit; // ← JAVÍTVA: korábban hiányzott
         }
 
         echo json_encode(["ok" => true, "message" => "success"]);

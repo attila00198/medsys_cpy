@@ -40,8 +40,13 @@ function formatTajSzam(szam) {
   return String(szam).replace(/(\d{3})(\d{3})(\d{3})/, "$1-$2-$3");
 }
 
+// JAVÍTVA: a hash értékadás mindig kivált hashchange-t,
+// ezért elegendő egyszerűen beállítani — az egyenlőség-ág
+// hibásan dispatch-elt egy extra eseményt, ami form újratöltést okozott.
 function navigate(hash) {
-  if (window.location.hash === `#${hash}`) {
+  const next = `#${hash}`;
+  if (window.location.hash === next) {
+    // Ugyanoda navigálunk: manuálisan triggereljük a renderelést
     window.dispatchEvent(new HashChangeEvent("hashchange"));
   } else {
     window.location.hash = hash;
@@ -55,8 +60,6 @@ function getHashParams() {
 }
 
 // ── ROUTER ────────────────────────────────────────────────
-// Saját router, mert a basicRouter nem kezeli a ?query paramétereket,
-// és nem támogatja az async render függvényeket.
 function initRouter(routes, container, defaultRoute = "dashboard") {
   async function renderRoute() {
     const { path, params } = getHashParams();
@@ -64,7 +67,6 @@ function initRouter(routes, container, defaultRoute = "dashboard") {
 
     container.innerHTML = "";
 
-    // Töltés jelző amíg az async oldal betölt
     const loader = p("Betöltés...").setStyle({ color: "var(--text-muted)", padding: "1rem" });
     container.appendChild(loader);
 
@@ -138,7 +140,6 @@ function renderTable(data) {
     const isMedExpired = user.is_med_expired;
     const isPsyExpired = user.is_psy_expired;
     const isInsExpired = user.is_ins_expired;
-    console.log(isInsExpired)
 
     return tr(
       td(
@@ -192,7 +193,7 @@ async function renderProfile(params) {
     : "?";
 
   const badge = (expired) =>
-    span(expired ? "Lejárt" : "Érvénes")
+    span(expired ? "Lejárt" : "Érvényes")
       .setClasses("badge", expired ? "badge-exp" : "badge-ok");
 
   const certCard = (title, expiresAt, valid) => {
@@ -297,7 +298,12 @@ async function renderForm(params) {
   ).setId("person-form");
 
   formEl.addEventListener("submit", async (e) => {
+    console.log("SUBMIT HANDLER ELINDULT");
+
     e.preventDefault();
+
+    console.log("PREVENT DEFAULT OK");
+
     const data = new FormData(e.target);
     const payload = {
       name: data.get("name"),
@@ -307,6 +313,7 @@ async function renderForm(params) {
       psy_expires_at: data.get("psy_expires_at") || null,
       ins_expires_at: data.get("ins_expires_at") || null,
     };
+    console.table(payload)
 
     try {
       const res = await fetch(API + (isEdit ? `?id=${id}` : ""), {
@@ -315,9 +322,14 @@ async function renderForm(params) {
         body: JSON.stringify(payload),
       });
       const json = await res.json();
+      console.log(json)
+
       if (!json.ok) throw new Error(json.error);
 
-      await loadData();
+      //await loadData();
+      // JAVÍTVA: a céloldal hash-e a jelenlegi hash-sel (#edit?id=X) sosem egyezik,
+      // ezért a navigate egyszerű hash értékadással dolgozik — ez mindig kivált
+      // hashchange eseményt, a router átnavigál a profil oldalra.
       navigate(isEdit ? `profile?id=${id}` : `profile?id=${json.id}`);
     } catch (err) {
       alert(`Hiba mentéskor: ${err.message}`);
