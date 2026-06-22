@@ -298,11 +298,7 @@ async function renderForm(params) {
   ).setId("person-form");
 
   formEl.addEventListener("submit", async (e) => {
-    console.log("SUBMIT HANDLER ELINDULT");
-
     e.preventDefault();
-
-    console.log("PREVENT DEFAULT OK");
 
     const data = new FormData(e.target);
     const payload = {
@@ -322,8 +318,6 @@ async function renderForm(params) {
         body: JSON.stringify(payload),
       });
       const json = await res.json();
-      console.log(json)
-
       if (!json.ok) throw new Error(json.error);
 
       //await loadData();
