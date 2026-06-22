@@ -9,6 +9,7 @@
     <title>MedSys</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="static/css/style.css" />
 </head>
 
@@ -16,7 +17,7 @@
 
     <header>
         <h1>MedSys</h1>
-        <p>Orvosi és pszichológiai alkalmassági nyilvántartás</p>
+        <p>Orvosy, pszihologiai és biztosítási nyilvántartás.</p>
     </header>
 
     <main id="app"></main>

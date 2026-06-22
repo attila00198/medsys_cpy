@@ -130,7 +130,7 @@ const replaceText = (element, newText) => {
 const _simpleTagNames = [
     "hr", "br", "div", "header", "main", "footer",
     "section", "h1", "h2", "h3", "h4", "h5", "h6",
-    "em", "mark", "small", "span", "p", "nav"
+    "em", "mark", "small", "span", "p", "nav", "i"
 ];
 for (const _t of _simpleTagNames) {
     globalThis[_t] = (...children) => tag(_t, ...children);

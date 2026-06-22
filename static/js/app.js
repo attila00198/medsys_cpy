@@ -34,24 +34,18 @@ async function loadPerson(id) {
   return json.data;
 }
 
-// ── SEGÉDFÜGGVÉNYEK ───────────────────────────────────────
-function checkValidity(dateString) {
-  if (!dateString) return false;
-  const date = new Date(dateString);
-  if (Number.isNaN(date.getTime())) return false;
-
-  const now = new Date();
-  const diffTime = now - date; // negatív = jövőbeli dátum
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  return diffDays >= 0 && diffDays <= VALIDITY_DAYS;
-}
+// ── SEGÉDFÜGGVÉNYEK ─────────────────────────────────────
 
 function formatTajSzam(szam) {
   return String(szam).replace(/(\d{3})(\d{3})(\d{3})/, "$1-$2-$3");
 }
 
 function navigate(hash) {
-  window.location.hash = hash;
+  if (window.location.hash === `#${hash}`) {
+    window.dispatchEvent(new HashChangeEvent("hashchange"));
+  } else {
+    window.location.hash = hash;
+  }
 }
 
 function getHashParams() {
@@ -97,10 +91,10 @@ function initRouter(routes, container, defaultRoute = "dashboard") {
 async function renderDashboard() {
   const persons = Array.isArray(allData) ? allData : [];
   const totalCount = persons.length;
-  const validMedicalCount = persons.filter(p => checkValidity(p.orvosi_kezdete)).length;
-  const validPsychologicalCount = persons.filter(p => checkValidity(p.pszichologiai_kezdete)).length;
-  const expiredMedicalCount = totalCount - validMedicalCount;
-  const expiredPsychologicalCount = totalCount - validPsychologicalCount;
+  const validMedicalCount = persons.filter(p => !p.is_med_expired).length;
+  const validPsyCount = persons.filter(p => !p.is_psy_expired).length;
+  const expiredMedicalCount = persons.filter(p => p.is_med_expired).length;
+  const expiredPsyCount = persons.filter(p => p.is_psy_expired).length;
 
   const card = (title, value, extraClass = "") => {
     const c = div(h2(title), span(String(value))).setClasses("card");
@@ -111,9 +105,9 @@ async function renderDashboard() {
   const dashboard = section(
     card("Összes személy", totalCount),
     card("Érvényes orvosi", validMedicalCount, "text-success"),
-    card("Érvényes pszichológiai", validPsychologicalCount, "text-success"),
+    card("Érvényes pszichológiai", validPsyCount, "text-success"),
     card("Lejárt orvosi", expiredMedicalCount, "text-danger"),
-    card("Lejárt pszichológiai", expiredPsychologicalCount, "text-danger")
+    card("Lejárt pszichológiai", expiredPsyCount, "text-danger")
   ).setClasses("dashboard");
 
   const toolbar = section(
@@ -126,8 +120,8 @@ async function renderDashboard() {
   toolbar.querySelector("#search-input").addEventListener("input", (e) => {
     const term = e.target.value.toLowerCase();
     const filtered = allData.filter(p =>
-      (p.nev && p.nev.toLowerCase().includes(term)) ||
-      (p.taj_szam && String(p.taj_szam).includes(term))
+      (p.name && p.name.toLowerCase().includes(term)) ||
+      (p.taj_num && String(p.taj_num).includes(term))
     );
     tableContainer.innerHTML = "";
     tableContainer.appendChild(renderTable(filtered));
@@ -138,22 +132,26 @@ async function renderDashboard() {
 
 // ── TÁBLA ─────────────────────────────────────────────────
 function renderTable(data) {
+  console.table(data);
   const safeText = (v) => v ?? "";
-  const rows = (Array.isArray(data) ? data : []).map(person => {
-    const orvValid = checkValidity(person.orvosi_kezdete);
-    const pszValid = checkValidity(person.pszichologiai_kezdete);
+  const rows = (Array.isArray(data) ? data : []).map(user => {
+    const isMedExpired = user.is_med_expired;
+    const isPsyExpired = user.is_psy_expired;
+    const isInsExpired = user.is_ins_expired;
+    console.log(isInsExpired)
 
     return tr(
       td(
-        a(person.nev, `#profile?id=${person.id}`).setClasses("personel-link")
+        a(user.name, `#profile?id=${user.id}`).setClasses("personel-link")
       ),
-      td(safeText(person.szuletesi_ido)),
-      td(safeText(formatTajSzam(person.taj_szam))),
-      td(orvValid ? "Érvényes" : "Lejárt")
-        .setClasses("status", orvValid ? "text-success" : "text-danger"),
-      td(pszValid ? "Érvényes" : "Lejárt")
-        .setClasses("status", pszValid ? "text-success" : "text-danger"),
-      td(safeText(person.megjegyzes))
+      td(safeText(user.birth_date)),
+      td(safeText(formatTajSzam(user.taj_num))),
+      td(isMedExpired ? "Lejárt" : "Érvényes")
+        .setClasses("status", isMedExpired ? "text-danger" : "text-success"),
+      td(isPsyExpired ? "Lejárt" : "Érvényes")
+        .setClasses("status", isPsyExpired ? "text-danger" : "text-success"),
+      td(isInsExpired ? "Lejárt" : "Érvényes")
+        .setClasses("status", isInsExpired ? "text-danger" : "text-success")
     );
   });
 
@@ -164,7 +162,7 @@ function renderTable(data) {
       th("TAJ szám"),
       th("Orvosi alk."),
       th("Pszichológiai alk."),
-      th("Megjegyzés")
+      th("Biztosítás")
     )),
     tbody(...rows)
   ).setClasses("table table-striped table-hover");
@@ -175,9 +173,9 @@ async function renderProfile(params) {
   const id = Number(params.get("id"));
   if (!id) throw new Error("Hiányzó azonosító.");
 
-  const person = await loadPerson(id);
+  const user = await loadPerson(id);
 
-  if (!person) {
+  if (!user) {
     return div(
       p("Személy nem található."),
       btn("← Vissza").addClass("btn-secondary").onClick(() => navigate("dashboard"))
@@ -185,67 +183,95 @@ async function renderProfile(params) {
   }
 
   const safeText = (v) => v ?? "—";
-  const orvValid = checkValidity(person.orvosi_kezdete);
-  const pszValid = checkValidity(person.pszichologiai_kezdete);
+  const isMedExpired = user.is_med_expired;
+  const isPsyExpired = user.is_psy_expired;
+  const isInsExpired = user.is_ins_expired;
 
-  const statusBadge = (valid) =>
-    span(valid ? "Érvényes" : "Lejárt")
-      .setClasses("status", valid ? "text-success" : "text-danger");
+  const initials = user.name
+    ? user.name.split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase()
+    : "?";
+
+  const badge = (expired) =>
+    span(expired ? "Lejárt" : "Érvénes")
+      .setClasses("badge", expired ? "badge-exp" : "badge-ok");
+
+  const certCard = (title, expiresAt, valid) => {
+    const top = div(
+      span(title).addClass("cert-title"),
+      badge(valid)
+    ).addClass("cert-top");
+
+    const date = p().addClass("cert-date");
+    date.innerHTML = `${valid ? "Lejár" : "Lejárt"}: <span>${safeText(expiresAt)}</span>`;
+
+    return div(top, date).addClass("cert-card");
+  };
+
+  const infoRow = (icon, label, value) =>
+    div(
+      span(
+        i().setClasses(`bi bi-${icon}`),
+        `${label}`
+      ).addClass("info-key"),
+      span(safeText(value)).addClass("info-val")
+    ).addClass("info-row");
 
   return div(
     div(
       btn("← Vissza").addClass("btn-secondary").onClick(() => navigate("dashboard")),
       btn("Szerkesztés").addClass("btn-primary").onClick(() => navigate(`edit?id=${id}`))
-    ).setClasses("profile-actions"),
-    h2(safeText(person.nev)).addClass("profile-name"),
+    ).addClass("back-row"),
+
     div(
+      div(initials).addClass("avatar"),
       div(
-        p(`Születési dátum: ${safeText(person.szuletesi_ido)}`),
-        p(`TAJ szám: ${safeText(formatTajSzam(person.taj_szam))}`),
-        p(`Megjegyzés: ${safeText(person.megjegyzes)}`)
-      ).addClass("profile-info"),
-      div(
-        div(
-          span("Orvosi alkalmasság").addClass("validity-label"),
-          p(`Kezdete: ${safeText(person.orvosi_kezdete)}`),
-          statusBadge(orvValid)
-        ).addClass("validity-card"),
-        div(
-          span("Pszichológiai alkalmasság").addClass("validity-label"),
-          p(`Kezdete: ${safeText(person.pszichologiai_kezdete)}`),
-          statusBadge(pszValid)
-        ).addClass("validity-card")
-      ).addClass("validity-grid")
-    ).addClass("profile-body")
-  ).addClass("profile-container");
+        p(safeText(user.name)).addClass("avatar-name"),
+        p(`Azonosító: #${user.id}`).addClass("avatar-sub")
+      )
+    ).addClass("avatar-row"),
+
+    p("Személyes adatok").addClass("section-label"),
+    div(
+      infoRow("calendar", "Születési dátum", user.birth_date),
+      infoRow("person-vcard", "TAJ szám", formatTajSzam(user.taj_num))
+    ).addClass("info-card"),
+
+    p("Érvényességek").addClass("section-label"),
+    div(
+      certCard("Orvosi alk.", user.med_expires_at, isMedExpired),
+      certCard("Pszichológiai alk.", user.psy_expires_at, isPsyExpired),
+      certCard("Biztosítás", user.ins_expires_at, isInsExpired)
+    ).addClass("cert-grid")
+
+  ).addClass("profile-wrap");
 }
 
 // ── FORM OLDAL (új személy / szerkesztés) ─────────────────
 async function renderForm(params) {
   const id = Number(params.get("id"));
-  const person = id ? await loadPerson(id) : null;
-  const isEdit = Boolean(person);
+  const user = id ? await loadPerson(id) : null;
+  const isEdit = Boolean(user);
 
   const nameInput = input()
     .setId("f-name").setName("name").setPlaceholder("Teljes név").addClass("form-control");
   const birthInput = input("date")
-    .setId("f-birth").setName("birth-date").addClass("form-control");
+    .setId("f-birth").setName("birth_date").addClass("form-control");
   const tajInput = input("number")
-    .setId("f-taj").setName("taj-number").setPlaceholder("123456789").addClass("form-control");
-  const orvInput = input("date")
-    .setId("f-orv").setName("orvosi-kezdete").addClass("form-control");
-  const pszInput = input("date")
-    .setId("f-psz").setName("pszichologiai-kezdete").addClass("form-control");
-  const megjegyzesInput = textarea()
-    .setId("f-megjegyzes").setName("megjegyzes").setPlaceholder("Megjegyzés...").addClass("form-control");
+    .setId("f-taj").setName("taj_num").setPlaceholder("123456789").addClass("form-control");
+  const medInput = input("date")
+    .setId("f-med").setName("med_expires_at").addClass("form-control");
+  const psyInput = input("date")
+    .setId("f-psy").setName("psy_expires_at").addClass("form-control");
+  const insInput = input("date")
+    .setId("f-ins").setName("ins_expires_at").addClass("form-control");
 
   if (isEdit) {
-    nameInput.setValue(person.nev ?? "");
-    birthInput.setValue(person.szuletesi_ido ?? "");
-    tajInput.setValue(person.taj_szam ?? "");
-    orvInput.setValue(person.orvosi_kezdete ?? "");
-    pszInput.setValue(person.pszichologiai_kezdete ?? "");
-    megjegyzesInput.setValue(person.megjegyzes ?? "");
+    nameInput.setValue(user.name ?? "");
+    birthInput.setValue(user.birth_date ?? "");
+    tajInput.setValue(user.taj_num ?? "");
+    medInput.setValue(user.med_expires_at ?? "");
+    psyInput.setValue(user.psy_expires_at ?? "");
+    insInput.setValue(user.ins_expires_at ?? "");
   }
 
   const fieldGroup = (labelText, inputEl, targetId) =>
@@ -258,9 +284,9 @@ async function renderForm(params) {
     fieldGroup("Teljes név:", nameInput, "f-name"),
     fieldGroup("Születési dátum:", birthInput, "f-birth"),
     fieldGroup("TAJ szám:", tajInput, "f-taj"),
-    fieldGroup("Orvosi alk. kezdete:", orvInput, "f-orv"),
-    fieldGroup("Pszichológiai alk. kezdete:", pszInput, "f-psz"),
-    fieldGroup("Megjegyzés:", megjegyzesInput, "f-megjegyzes"),
+    fieldGroup("Orvosi alk. lejárata:", medInput, "f-med"),
+    fieldGroup("Pszichológiai alk. lejárata:", psyInput, "f-psy"),
+    fieldGroup("Biztosítás lejárata:", insInput, "f-ins"),
     div(
       btn("Mégse").addClass("btn-secondary").onClick(() =>
         navigate(isEdit ? `profile?id=${id}` : "dashboard")
@@ -274,12 +300,12 @@ async function renderForm(params) {
     e.preventDefault();
     const data = new FormData(e.target);
     const payload = {
-      nev: data.get("name"),
-      szuletesi_ido: data.get("birth-date"),
-      taj_szam: data.get("taj-number"),
-      orvosi_kezdete: data.get("orvosi-kezdete") || null,
-      pszichologiai_kezdete: data.get("pszichologiai-kezdete") || null,
-      megjegyzes: data.get("megjegyzes") || null,
+      name: data.get("name"),
+      birth_date: data.get("birth_date"),
+      taj_num: data.get("taj_num"),
+      med_expires_at: data.get("med_expires_at") || null,
+      psy_expires_at: data.get("psy_expires_at") || null,
+      ins_expires_at: data.get("ins_expires_at") || null,
     };
 
     try {
@@ -303,10 +329,10 @@ async function renderForm(params) {
       btn("← Vissza").addClass("btn-secondary").onClick(() =>
         navigate(isEdit ? `profile?id=${id}` : "dashboard")
       )
-    ).addClass("profile-actions"),
-    h2(isEdit ? `${person.nev} szerkesztése` : "Új személy felvétele").addClass("profile-name"),
+    ).addClass("back-row"),
+    h2(isEdit ? `${user.name} szerkesztése` : "Új személy felvétele").addClass("avatar-name"),
     formEl
-  ).addClass("profile-container");
+  ).addClass("profile-wrap");
 }
 
 // ── INIT ──────────────────────────────────────────────────
