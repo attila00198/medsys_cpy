@@ -134,7 +134,6 @@ async function renderDashboard() {
 
 // ── TÁBLA ─────────────────────────────────────────────────
 function renderTable(data) {
-  console.table(data);
   const safeText = (v) => v ?? "";
   const rows = (Array.isArray(data) ? data : []).map(user => {
     const isMedExpired = user.is_med_expired;
@@ -319,7 +318,6 @@ async function renderForm(params) {
       ins_expires_at: data.get("ins_expires_at") || null,
       ins_payment: data.get("ins_payment") || null,
     };
-    console.table(payload)
 
     try {
       const res = await fetch(API + (isEdit ? `?id=${id}` : ""), {
