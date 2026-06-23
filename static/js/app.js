@@ -237,6 +237,11 @@ async function renderProfile(params) {
       infoRow("person-vcard", "TAJ szám", formatTajSzam(user.taj_num))
     ).addClass("info-card"),
 
+    p("Biztosítás").addClass("section-label"),
+    div(
+      infoRow("cash-coin", "Befizetett összeg", user.ins_payment ? `${user.ins_payment} Ft` : "—")
+    ).addClass("info-card"),
+
     p("Érvényességek").addClass("section-label"),
     div(
       certCard("Orvosi alk.", user.med_expires_at, isMedExpired),
@@ -265,6 +270,8 @@ async function renderForm(params) {
     .setId("f-psy").setName("psy_expires_at").addClass("form-control");
   const insInput = input("date")
     .setId("f-ins").setName("ins_expires_at").addClass("form-control");
+  const paymentInput = input("number")
+    .setId("f-payment").setName("ins_payment").setPlaceholder("15000 ft.").addClass("form-control");
 
   if (isEdit) {
     nameInput.setValue(user.name ?? "");
@@ -273,6 +280,7 @@ async function renderForm(params) {
     medInput.setValue(user.med_expires_at ?? "");
     psyInput.setValue(user.psy_expires_at ?? "");
     insInput.setValue(user.ins_expires_at ?? "");
+    paymentInput.setValue(user.ins_payment ?? "");
   }
 
   const fieldGroup = (labelText, inputEl, targetId) =>
@@ -288,6 +296,7 @@ async function renderForm(params) {
     fieldGroup("Orvosi alk. lejárata:", medInput, "f-med"),
     fieldGroup("Pszichológiai alk. lejárata:", psyInput, "f-psy"),
     fieldGroup("Biztosítás lejárata:", insInput, "f-ins"),
+    fieldGroup("Befizetett összeg: ", paymentInput, "f-payment"),
     div(
       btn("Mégse").addClass("btn-secondary").onClick(() =>
         navigate(isEdit ? `profile?id=${id}` : "dashboard")
@@ -308,6 +317,7 @@ async function renderForm(params) {
       med_expires_at: data.get("med_expires_at") || null,
       psy_expires_at: data.get("psy_expires_at") || null,
       ins_expires_at: data.get("ins_expires_at") || null,
+      ins_payment: data.get("ins_payment") || null,
     };
     console.table(payload)
 

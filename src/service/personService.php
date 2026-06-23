@@ -15,7 +15,8 @@ class PersonService
                     u.taj_num,
                     mc.expires_at   AS med_expires_at,
                     pc.expires_at   AS psy_expires_at,
-                    i.expires_at    AS ins_expires_at
+                    i.expires_at    AS ins_expires_at,
+                    i.payment       As ins_payment
                 FROM users u
                 LEFT JOIN medical_certificates     mc ON mc.user_id = u.id
                 LEFT JOIN psychological_certificates pc ON pc.user_id = u.id
@@ -39,7 +40,8 @@ class PersonService
                 u.taj_num,
                 mc.expires_at   AS med_expires_at,
                 pc.expires_at   AS psy_expires_at,
-                i.expires_at    AS ins_expires_at
+                i.expires_at    AS ins_expires_at,
+                i.payment       AS ins_payment
             FROM users u
             LEFT JOIN medical_certificates       mc ON mc.user_id = u.id
             LEFT JOIN psychological_certificates pc ON pc.user_id = u.id
@@ -97,7 +99,7 @@ class PersonService
             $stmt->bindValue(":user_id",    $userId, SQLITE3_INTEGER);
             $stmt->bindValue(":issued_at",  $currentDate);
             $stmt->bindValue(":expires_at", $data["ins_expires_at"]);
-            $stmt->bindValue(":payment",    $data["payment"] ?? 0, SQLITE3_INTEGER);
+            $stmt->bindValue(":payment",    $data["ins_payment"] ?? 0, SQLITE3_INTEGER);
             $stmt->execute();
         }
 
@@ -148,17 +150,17 @@ class PersonService
 
         if (!empty($data["ins_expires_at"])) {
             $stmt = $this->db->prepare(
-                "INSERT INTO insurances (user_id, issued_at, expires_at, payment)
-             VALUES (:user_id, :issued_at, :expires_at, :payment) -- JAVÍTVA: :issued_at hozzáadva
+                "INSERT INTO insurances (user_id, started_at, expires_at, payment)
+             VALUES (:user_id, :started_at, :expires_at, :payment)
              ON CONFLICT(user_id) DO UPDATE SET
-                 issued_at  = excluded.issued_at,   -- JAVÍTVA: frissül az aktuális dátumra
+                 started_at = excluded.started_at,
                  expires_at = excluded.expires_at,
                  payment    = excluded.payment"
             );
             $stmt->bindValue(":user_id",    $id, SQLITE3_INTEGER);
-            $stmt->bindValue(":issued_at",  $currentDate);
+            $stmt->bindValue(":started_at", $currentDate);
             $stmt->bindValue(":expires_at", $data["ins_expires_at"]);
-            $stmt->bindValue(":payment",    $data["payment"] ?? 0, SQLITE3_INTEGER);
+            $stmt->bindValue(":payment",    $data["ins_payment"] ?? 0, SQLITE3_INTEGER);
             $stmt->execute();
         }
 
@@ -191,6 +193,7 @@ class PersonService
             'is_med_expired'    => $this->isExpired($row['med_expires_at']),
             'is_psy_expired'    => $this->isExpired($row['psy_expires_at']),
             'is_ins_expired'    => $this->isExpired($row['ins_expires_at']),
+            "ins_payment"       => $row["ins_payment"],
         ];
     }
 
