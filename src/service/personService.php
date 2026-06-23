@@ -65,33 +65,37 @@ class PersonService
         $stmt->execute();
 
         $userId = $this->db->lastInsertRowID();
+        $currentDate = date("Y-m-d"); // Egyszer kérjük le a mai dátumot stringként
 
         if (!empty($data["med_expires_at"])) {
             $stmt = $this->db->prepare(
-                "INSERT INTO medical_certificates (user_id, expires_at)
-                 VALUES (:user_id, :expires_at)"
+                "INSERT INTO medical_certificates (user_id, issued_at, expires_at)
+             VALUES (:user_id, :issued_at, :expires_at)" // JAVÍTVA: :issued_at hozzáadva
             );
             $stmt->bindValue(":user_id",    $userId, SQLITE3_INTEGER);
+            $stmt->bindValue(":issued_at",  $currentDate); // JAVÍTVA: tiszta string hiba nélkül
             $stmt->bindValue(":expires_at", $data["med_expires_at"]);
             $stmt->execute();
         }
 
         if (!empty($data["psy_expires_at"])) {
             $stmt = $this->db->prepare(
-                "INSERT INTO psychological_certificates (user_id, expires_at)
-                 VALUES (:user_id, :expires_at)"
+                "INSERT INTO psychological_certificates (user_id, issued_at, expires_at)
+             VALUES (:user_id, :issued_at, :expires_at)" // JAVÍTVA: :issued_at hozzáadva
             );
             $stmt->bindValue(":user_id",    $userId, SQLITE3_INTEGER);
+            $stmt->bindValue(":issued_at",  $currentDate);
             $stmt->bindValue(":expires_at", $data["psy_expires_at"]);
             $stmt->execute();
         }
 
         if (!empty($data["ins_expires_at"])) {
             $stmt = $this->db->prepare(
-                "INSERT INTO insurances (user_id, expires_at, payment)
-                 VALUES (:user_id, :expires_at, :payment)"
+                "INSERT INTO insurances (user_id, issued_at, expires_at, payment)
+             VALUES (:user_id, :issued_at, :expires_at, :payment)" // JAVÍTVA: :issued_at hozzáadva
             );
             $stmt->bindValue(":user_id",    $userId, SQLITE3_INTEGER);
+            $stmt->bindValue(":issued_at",  $currentDate);
             $stmt->bindValue(":expires_at", $data["ins_expires_at"]);
             $stmt->bindValue(":payment",    $data["payment"] ?? 0, SQLITE3_INTEGER);
             $stmt->execute();
@@ -112,39 +116,47 @@ class PersonService
         $stmt->bindValue(":id",         $id, SQLITE3_INTEGER);
         $stmt->execute();
 
-        // JAVÍTVA: INSERT OR REPLACE helyett ON CONFLICT DO UPDATE,
-        // hogy a meglévő sor id-ja ne változzon meg.
+        $currentDate = date("Y-m-d"); // Egyszer kérjük le a mai dátumot stringként
+
         if (!empty($data["med_expires_at"])) {
             $stmt = $this->db->prepare(
-                "INSERT INTO medical_certificates (user_id, expires_at)
-                 VALUES (:user_id, :expires_at)
-                 ON CONFLICT(user_id) DO UPDATE SET expires_at = excluded.expires_at"
+                "INSERT INTO medical_certificates (user_id, issued_at, expires_at)
+             VALUES (:user_id, :issued_at, :expires_at) -- JAVÍTVA: :issued_at hozzáadva
+             ON CONFLICT(user_id) DO UPDATE SET 
+                 issued_at  = excluded.issued_at,   -- JAVÍTVA: frissül az aktuális dátumra
+                 expires_at = excluded.expires_at"
             );
             $stmt->bindValue(":user_id",    $id, SQLITE3_INTEGER);
+            $stmt->bindValue(":issued_at",  $currentDate);
             $stmt->bindValue(":expires_at", $data["med_expires_at"]);
             $stmt->execute();
         }
 
         if (!empty($data["psy_expires_at"])) {
             $stmt = $this->db->prepare(
-                "INSERT INTO psychological_certificates (user_id, expires_at)
-                 VALUES (:user_id, :expires_at)
-                 ON CONFLICT(user_id) DO UPDATE SET expires_at = excluded.expires_at"
+                "INSERT INTO psychological_certificates (user_id, issued_at, expires_at)
+             VALUES (:user_id, :issued_at, :expires_at) -- JAVÍTVA: :issued_at hozzáadva
+             ON CONFLICT(user_id) DO UPDATE SET 
+                 issued_at  = excluded.issued_at,   -- JAVÍTVA: frissül az aktuális dátumra
+                 expires_at = excluded.expires_at"
             );
             $stmt->bindValue(":user_id",    $id, SQLITE3_INTEGER);
+            $stmt->bindValue(":issued_at",  $currentDate);
             $stmt->bindValue(":expires_at", $data["psy_expires_at"]);
             $stmt->execute();
         }
 
         if (!empty($data["ins_expires_at"])) {
             $stmt = $this->db->prepare(
-                "INSERT INTO insurances (user_id, expires_at, payment)
-                 VALUES (:user_id, :expires_at, :payment)
-                 ON CONFLICT(user_id) DO UPDATE SET
-                     expires_at = excluded.expires_at,
-                     payment    = excluded.payment"
+                "INSERT INTO insurances (user_id, issued_at, expires_at, payment)
+             VALUES (:user_id, :issued_at, :expires_at, :payment) -- JAVÍTVA: :issued_at hozzáadva
+             ON CONFLICT(user_id) DO UPDATE SET
+                 issued_at  = excluded.issued_at,   -- JAVÍTVA: frissül az aktuális dátumra
+                 expires_at = excluded.expires_at,
+                 payment    = excluded.payment"
             );
             $stmt->bindValue(":user_id",    $id, SQLITE3_INTEGER);
+            $stmt->bindValue(":issued_at",  $currentDate);
             $stmt->bindValue(":expires_at", $data["ins_expires_at"]);
             $stmt->bindValue(":payment",    $data["payment"] ?? 0, SQLITE3_INTEGER);
             $stmt->execute();
