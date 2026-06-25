@@ -271,6 +271,8 @@ async function renderForm(params) {
     .setId("f-ins").setName("ins_expires_at").addClass("form-control");
   const paymentInput = input("number")
     .setId("f-payment").setName("ins_payment").setPlaceholder("15000 ft.").addClass("form-control");
+  const remarskInput = textarea().setName("remarks_input").setId("remarks_input")
+    .setPlaceholder("Megjegyzés").addClass("form-controll");
 
   if (isEdit) {
     nameInput.setValue(user.name ?? "");
@@ -280,6 +282,7 @@ async function renderForm(params) {
     psyInput.setValue(user.psy_expires_at ?? "");
     insInput.setValue(user.ins_expires_at ?? "");
     paymentInput.setValue(user.ins_payment ?? "");
+    remarskInput.setValue(user.remarks ?? "");
   }
 
   const fieldGroup = (labelText, inputEl, targetId) =>
@@ -296,6 +299,7 @@ async function renderForm(params) {
     fieldGroup("Pszichológiai alk. lejárata:", psyInput, "f-psy"),
     fieldGroup("Biztosítás lejárata:", insInput, "f-ins"),
     fieldGroup("Befizetett összeg: ", paymentInput, "f-payment"),
+    fieldGroup("Megjegyzések: ", remarskInput, "remarks_input"),
     div(
       btn("Mégse").addClass("btn-secondary").onClick(() =>
         navigate(isEdit ? `profile?id=${id}` : "dashboard")
@@ -317,6 +321,7 @@ async function renderForm(params) {
       psy_expires_at: data.get("psy_expires_at") || null,
       ins_expires_at: data.get("ins_expires_at") || null,
       ins_payment: data.get("ins_payment") || null,
+      remarks: data.get("remarks_input") || null,
     };
 
     try {
@@ -328,10 +333,6 @@ async function renderForm(params) {
       const json = await res.json();
       if (!json.ok) throw new Error(json.error);
 
-      //await loadData();
-      // JAVÍTVA: a céloldal hash-e a jelenlegi hash-sel (#edit?id=X) sosem egyezik,
-      // ezért a navigate egyszerű hash értékadással dolgozik — ez mindig kivált
-      // hashchange eseményt, a router átnavigál a profil oldalra.
       navigate(isEdit ? `profile?id=${id}` : `profile?id=${json.id}`);
     } catch (err) {
       alert(`Hiba mentéskor: ${err.message}`);
