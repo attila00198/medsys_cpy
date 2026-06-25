@@ -38,6 +38,7 @@ class PersonService
                 u.name,
                 u.birth_date,
                 u.taj_num,
+                u.remarks,
                 mc.expires_at   AS med_expires_at,
                 pc.expires_at   AS psy_expires_at,
                 i.expires_at    AS ins_expires_at,
@@ -58,12 +59,13 @@ class PersonService
     public function createPerson(array $data): int
     {
         $stmt = $this->db->prepare(
-            "INSERT INTO users (name, birth_date, taj_num)
-         VALUES (:name, :birth_date, :taj_num)"
+            "INSERT INTO users (name, birth_date, taj_num, remarks)
+         VALUES (:name, :birth_date, :taj_num, :remarks)"
         );
         $stmt->bindValue(":name",       $data["name"]);
         $stmt->bindValue(":birth_date", $data["birth_date"]);
         $stmt->bindValue(":taj_num",    $data["taj_num"]);
+        $stmt->bindValue(":remarks",    $data["remarks"]);
         $stmt->execute();
 
         $userId = $this->db->lastInsertRowID();
@@ -109,12 +111,13 @@ class PersonService
     public function updatePerson(int $id, array $data): bool
     {
         $stmt = $this->db->prepare(
-            "UPDATE users SET name = :name, birth_date = :birth_date, taj_num = :taj_num
+            "UPDATE users SET name = :name, birth_date = :birth_date, taj_num = :taj_num, remarks = :remarks
          WHERE id = :id"
         );
         $stmt->bindValue(":name",       $data["name"]);
         $stmt->bindValue(":birth_date", $data["birth_date"]);
         $stmt->bindValue(":taj_num",    $data["taj_num"]);
+        $stmt->bindValue(":remarks",     $data["remarks"]);
         $stmt->bindValue(":id",         $id, SQLITE3_INTEGER);
         $stmt->execute();
 
@@ -187,6 +190,7 @@ class PersonService
             'name'              => $row['name'],
             'birth_date'        => $row['birth_date'],
             'taj_num'           => $row['taj_num'],
+            'remarks'           => $row['remarks'],
             'med_expires_at'    => $row['med_expires_at'],
             'psy_expires_at'    => $row['psy_expires_at'],
             'ins_expires_at'    => $row['ins_expires_at'],

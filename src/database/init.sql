@@ -1,3 +1,4 @@
+-- craete tables
 CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
@@ -31,14 +32,14 @@ CREATE TABLE IF NOT EXISTS insurances (
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
-/* -- Users
-INSERT INTO users (name, birth_date, taj_num) VALUES
+-- Users
+
+/* INSERT INTO users (name, birth_date, taj_num, remarks) VALUES
     ('Kovács Péter',    '1985-03-12', 123456789, "Megjegyzés"),
     ('Nagy Erzsébet',   '1990-07-24', 234567890, "Megjegyzés"),
     ('Szabó Gábor',     '1978-11-05', 345678901, "Megjegyzés"),
     ('Horváth Katalin', '1995-02-18', 456789012, "Megjegyzés"),
     ('Tóth Márton',     '1982-09-30', 567890123, "Megjegyzés");
-
 -- Medical certificates
 INSERT INTO medical_certificates (user_id, issued_at, expires_at) VALUES
     (1, '2025-01-10', '2026-01-10'),
