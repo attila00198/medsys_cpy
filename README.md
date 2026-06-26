@@ -48,6 +48,58 @@ Then open:
 http://127.0.0.1:8000/
 ```
 
+## Apache Rewrite Setup
+
+### 1. Enable the rewrite module
+
+```bash
+sudo a2enmod rewrite
+sudo systemctl restart apache2
+```
+
+### 2. Update the VirtualHost / site configuration
+
+Open:
+
+```bash
+/etc/apache2/sites-available/000-default.conf
+```
+
+And make sure it contains:
+
+```apache
+<VirtualHost *:80>
+    DocumentRoot /var/www/html
+
+    <Directory /var/www/html>
+        AllowOverride All
+        Require all granted
+    </Directory>
+</VirtualHost>
+```
+
+### 3. Create the .htaccess file
+
+Place it at:
+
+```bash
+/var/www/html/.htaccess
+```
+
+With this content:
+
+```apache
+RewriteEngine On
+
+# If the request points to an existing file or directory, do not rewrite it
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Send everything else to index.php
+RewriteRule ^ index.php [QSA,L]
+```
+
 ## Notes
 
 This project is intentionally simple and focused on clarity rather than heavy frameworks. It is a good starting point for a small internal records system or a learning project for PHP + SQLite + vanilla JavaScript.
