@@ -26,14 +26,13 @@ CREATE TABLE IF NOT EXISTS psychological_certificates (
 CREATE TABLE IF NOT EXISTS insurances (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL UNIQUE,
-    started_at TEXT,
+    issued_at TEXT,
     expires_at TEXT NOT NULL,
     payment INTEGER NOT NULL DEFAULT 0,
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
 -- Users
-
 /* INSERT INTO users (name, birth_date, taj_num, remarks) VALUES
     ('Kovács Péter',    '1985-03-12', 123456789, "Megjegyzés"),
     ('Nagy Erzsébet',   '1990-07-24', 234567890, "Megjegyzés"),
@@ -57,7 +56,7 @@ INSERT INTO psychological_certificates (user_id, issued_at, expires_at) VALUES
     (5, '2024-09-20', '2025-09-20');
 
 -- Insurances
-INSERT INTO insurances (user_id, started_at, expires_at, payment) VALUES
+INSERT INTO insurances (user_id, issued_at, expires_at, payment) VALUES
     (1, '2025-01-01', '2026-01-01', 45000),
     (2, '2025-03-01', '2026-03-01', 45000),
     (3, '2024-07-01', '2025-07-01', 38000),
