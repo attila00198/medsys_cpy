@@ -2,29 +2,26 @@
 
 class Router
 {
-    public function __construct(private PersonController $personController)
-    {
-        $this->personController = $personController;
-    }
+    public function __construct(private UserController $userController) {}
 
     public function dispatch(string $method, string $url)
     {
-        if ($url !== "/api/person") {
+        if ($url !== '/api/person') {
             return;
         }
 
         switch ($method) {
-            case "GET":
-                $this->personController->get();
+            case 'GET':
+                $this->userController->get();
                 break;
-            case "POST":
-                $this->personController->create();
+            case 'POST':
+                $this->userController->create();
                 break;
-            case "PUT":
-                $this->personController->update();
+            case 'PUT':
+                $this->userController->update();
                 break;
             default:
-                throw new Exception("Method not supported.");
+                throw new Exception('Method not supported.');
         }
     }
 }
