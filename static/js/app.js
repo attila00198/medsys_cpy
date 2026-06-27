@@ -1,4 +1,4 @@
-const API = "/api/person";
+const API = "/api/users";
 
 // Az alkalmassági vizsgálat ennyi napig érvényes a kezdő dátumtól
 const VALIDITY_DAYS = 30;

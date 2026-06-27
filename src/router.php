@@ -8,7 +8,7 @@ class Router
 
     public function dispatch(string $method, string $url)
     {
-        if ($url !== '/api/person') {
+        if ($url !== '/api/users') {
             return;
         }
 

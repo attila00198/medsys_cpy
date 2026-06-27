@@ -28,6 +28,17 @@ The project provides a lightweight dashboard where users can:
 - static/ - frontend assets (CSS/JS)
 - tests/ - basic schema and app checks
 
+## Endpoints
+- GET
+  - `/api/person`
+- - `/api/person?id`
+- POST
+  - `/api/person?id`
+- Put
+  - `/api/persone?id`
+- DELETE
+  - `/api/persone?id`
+
 ## Requirements
 
 - PHP 8+
