@@ -46,6 +46,10 @@ class Database
                 continue;
             }
 
+            if (!preg_match('/^(CREATE|ALTER|DROP|PRAGMA)\b/i', $statement)) {
+                continue;
+            }
+
             if (preg_match('/^CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?(?:`?([a-zA-Z0-9_]+)`?)/i', $statement, $matches)) {
                 $this->ensureTable($matches[1], $statement);
                 continue;
@@ -184,5 +188,4 @@ class Database
 
         return $items;
     }
-
 }
