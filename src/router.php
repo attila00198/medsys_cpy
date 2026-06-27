@@ -2,7 +2,9 @@
 
 class Router
 {
-    public function __construct(private UserController $userController) {}
+    public function __construct(private UserController $userController)
+    {
+    }
 
     public function dispatch(string $method, string $url)
     {
@@ -19,6 +21,9 @@ class Router
                 break;
             case 'PUT':
                 $this->userController->update();
+                break;
+            case 'DELETE':
+                $this->userController->delete();
                 break;
             default:
                 throw new Exception('Method not supported.');

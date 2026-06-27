@@ -34,6 +34,26 @@ async function loadUser(id) {
   return json.data;
 }
 
+async function deleteUser(id) {
+  const confirmed = window.confirm("Biztosan törölni szeretnéd ezt a személyt?");
+  if (!confirmed) return;
+
+  try {
+    const res = await fetch(`${API}?id=${id}`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+    });
+
+    const json = await res.json();
+    if (!json.ok && json.ok !== undefined) {
+      throw new Error(json.error || "A törlés nem sikerült.");
+    }
+    navigate("dashboard");
+  } catch (err) {
+    alert(`Hiba törléskor: ${err.message}`);
+  }
+}
+
 // ── SEGÉDFÜGGVÉNYEK ─────────────────────────────────────
 
 function formatTajSzam(szam) {
@@ -178,7 +198,8 @@ async function renderProfile(params) {
   if (!user) {
     return div(
       p("Felhasználó nem található."),
-      btn("← Vissza").addClass("btn-secondary").onClick(() => navigate("dashboard"))
+      btn("← Vissza").addClass("btn-secondary").onClick(() => navigate("dashboard")),
+      btn("← Törlés").addClass("btn-danger").onClick(() => deleteUser(id))
     );
   }
 
@@ -297,7 +318,8 @@ function buildProfile(user) {
 
   return div(
     div(
-      btn("← Vissza").addClass("btn-secondary").onClick(() => navigate("dashboard"))
+      btn("← Vissza").addClass("btn-secondary").onClick(() => navigate("dashboard")),
+      btn("🗑️ Törlés").addClass("btn-danger").onClick(() => deleteUser(user.id))
     ).addClass("back-row"),
 
     div(

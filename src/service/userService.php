@@ -2,7 +2,9 @@
 
 class UserService
 {
-    public function __construct(private Database $db) {}
+    public function __construct(private Database $db)
+    {
+    }
     public function getUser(?int $id = null)
     {
         if ($id === null) {
@@ -59,10 +61,10 @@ class UserService
              VALUES (:name, :birth_date, :taj_num, :remarks)"
         );
         $stmt->execute([
-            ':name'       => $data['name'],
+            ':name' => $data['name'],
             ':birth_date' => $data['birth_date'],
-            ':taj_num'    => $data['taj_num'],
-            ':remarks'    => $data['remarks'] ?? null,
+            ':taj_num' => $data['taj_num'],
+            ':remarks' => $data['remarks'] ?? null,
         ]);
 
         $userId = $this->db->lastInsertId();
@@ -74,8 +76,8 @@ class UserService
                  VALUES (:user_id, :issued_at, :expires_at)"
             );
             $stmt->execute([
-                ':user_id'    => $userId,
-                ':issued_at'  => $currentDate,
+                ':user_id' => $userId,
+                ':issued_at' => $currentDate,
                 ':expires_at' => $data['med_expires_at'],
             ]);
         }
@@ -86,8 +88,8 @@ class UserService
                  VALUES (:user_id, :issued_at, :expires_at)"
             );
             $stmt->execute([
-                ':user_id'    => $userId,
-                ':issued_at'  => $currentDate,
+                ':user_id' => $userId,
+                ':issued_at' => $currentDate,
                 ':expires_at' => $data['psy_expires_at'],
             ]);
         }
@@ -98,10 +100,10 @@ class UserService
                  VALUES (:user_id, :issued_at, :expires_at, :payment)"
             );
             $stmt->execute([
-                ':user_id'    => $userId,
-                ':issued_at'  => $currentDate,
+                ':user_id' => $userId,
+                ':issued_at' => $currentDate,
                 ':expires_at' => $data['ins_expires_at'],
-                ':payment'    => $data['ins_payment'] ?? 0,
+                ':payment' => $data['ins_payment'] ?? 0,
             ]);
         }
 
@@ -121,11 +123,11 @@ class UserService
                  WHERE id = :id"
             );
             $stmt->execute([
-                ':name'       => $data['name'],
+                ':name' => $data['name'],
                 ':birth_date' => $data['birth_date'],
-                ':taj_num'    => $data['taj_num'],
-                ':remarks'    => $data['remarks'] ?? null,
-                ':id'         => $id,
+                ':taj_num' => $data['taj_num'],
+                ':remarks' => $data['remarks'] ?? null,
+                ':id' => $id,
             ]);
         }
 
@@ -138,8 +140,8 @@ class UserService
                      expires_at = excluded.expires_at"
             );
             $stmt->execute([
-                ':user_id'    => $id,
-                ':issued_at'  => $currentDate,
+                ':user_id' => $id,
+                ':issued_at' => $currentDate,
                 ':expires_at' => $data['med_expires_at'],
             ]);
         }
@@ -153,8 +155,8 @@ class UserService
                      expires_at = excluded.expires_at"
             );
             $stmt->execute([
-                ':user_id'    => $id,
-                ':issued_at'  => $currentDate,
+                ':user_id' => $id,
+                ':issued_at' => $currentDate,
                 ':expires_at' => $data['psy_expires_at'],
             ]);
         }
@@ -169,12 +171,30 @@ class UserService
                      payment    = excluded.payment"
             );
             $stmt->execute([
-                ':user_id'    => $id,
+                ':user_id' => $id,
                 ':started_at' => $currentDate,
                 ':expires_at' => $data['ins_expires_at'],
-                ':payment'    => $data['ins_payment'] ?? 0,
+                ':payment' => $data['ins_payment'] ?? 0,
             ]);
         }
+
+        return true;
+    }
+
+    public function deleteUser(int $id): bool
+    {
+        $stmt = $this->db->prepare('DELETE FROM medical_certificates WHERE user_id = ?');
+        if (!$stmt->execute([$id]))
+            return false;
+        $stmt = $this->db->prepare('DELETE FROM psychological_certificates WHERE user_id = ?');
+        if (!$stmt->execute([$id]))
+            return false;
+        $stmt = $this->db->prepare('DELETE FROM insurances WHERE user_id = ?');
+        if (!$stmt->execute([$id]))
+            return false;
+        $stmt = $this->db->prepare('DELETE FROM users WHERE id = ?');
+        if (!$stmt->execute([$id]))
+            return false;
 
         return true;
     }
@@ -182,10 +202,10 @@ class UserService
     private function formatForDashboard(array $row): array
     {
         return [
-            'id'             => $row['id'],
-            'name'           => $row['name'],
-            'birth_date'     => $row['birth_date'],
-            'taj_num'        => $row['taj_num'],
+            'id' => $row['id'],
+            'name' => $row['name'],
+            'birth_date' => $row['birth_date'],
+            'taj_num' => $row['taj_num'],
             'is_med_expired' => $this->isExpired($row['med_expires_at']),
             'is_psy_expired' => $this->isExpired($row['psy_expires_at']),
             'is_ins_expired' => $this->isExpired($row['ins_expires_at']),
@@ -195,24 +215,25 @@ class UserService
     private function formatForProfile(array $row): array
     {
         return [
-            'id'             => $row['id'],
-            'name'           => $row['name'],
-            'birth_date'     => $row['birth_date'],
-            'taj_num'        => $row['taj_num'],
-            'remarks'        => $row['remarks'],
+            'id' => $row['id'],
+            'name' => $row['name'],
+            'birth_date' => $row['birth_date'],
+            'taj_num' => $row['taj_num'],
+            'remarks' => $row['remarks'],
             'med_expires_at' => $row['med_expires_at'],
             'psy_expires_at' => $row['psy_expires_at'],
             'ins_expires_at' => $row['ins_expires_at'],
             'is_med_expired' => $this->isExpired($row['med_expires_at']),
             'is_psy_expired' => $this->isExpired($row['psy_expires_at']),
             'is_ins_expired' => $this->isExpired($row['ins_expires_at']),
-            'ins_payment'    => $row['ins_payment'],
+            'ins_payment' => $row['ins_payment'],
         ];
     }
 
     private function isExpired(?string $date): bool
     {
-        if (empty($date)) return false;
+        if (empty($date))
+            return false;
         return new DateTime($date) < new DateTime();
     }
 }

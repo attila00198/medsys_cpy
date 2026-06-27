@@ -2,7 +2,9 @@
 
 class UserController
 {
-    public function __construct(private UserService $userService) {}
+    public function __construct(private UserService $userService)
+    {
+    }
 
     public function get()
     {
@@ -53,6 +55,21 @@ class UserController
         }
 
         echo json_encode(['ok' => true, 'message' => 'success']);
+        exit;
+    }
+
+    public function delete()
+    {
+        $id = $_GET['id'] ?? null;
+        if (!$id) {
+            http_response_code(400);
+            echo json_encode(['ok' => false, 'error' => 'Missing ID.']);
+            exit;
+        }
+
+        $this->userService->deleteUser((int) $id);
+        http_response_code(200);
+        echo json_encode(['' => true, 'message' => 'success']);
         exit;
     }
 }
