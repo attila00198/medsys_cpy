@@ -111,6 +111,8 @@ function initRouter(routes, container, defaultRoute = "dashboard") {
 
 // ── DASHBOARD OLDAL ───────────────────────────────────────
 async function renderDashboard() {
+  await loadData();
+
   const persons = Array.isArray(allData) ? allData : [];
   const totalCount = persons.length;
   const validMedicalCount = persons.filter(p => !p.is_med_expired).length;
