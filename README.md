@@ -30,23 +30,24 @@ The project provides a lightweight dashboard where users can:
 
 ## Endpoints
 - GET
-  - `/api/person`
-- - `/api/person?id`
+  - `/api/users`
+- - `/api/users?id`
 - POST
-  - `/api/person?id`
+  - `/api/users?id`
 - Put
-  - `/api/persone?id`
+  - `/api/userse?id`
 - DELETE
-  - `/api/persone?id`
+  - `/api/userse?id`
 
 ## Requirements
 
 - PHP 8+
-- SQLite support enabled in PHP
+- PDO SQLite support enabled in PHP
 - A web server or PHP built-in server
 
 ## Running the Project
 
+#### PHP integrated server
 From the project root, start a local PHP server:
 
 ```bash
@@ -59,16 +60,16 @@ Then open:
 http://127.0.0.1:8000/
 ```
 
-## Apache Rewrite Setup
+### Apache webserver
 
-### 1. Enable the rewrite module
+#### 1. Enable the rewrite module
 
 ```bash
 sudo a2enmod rewrite
 sudo systemctl restart apache2
 ```
 
-### 2. Update the VirtualHost / site configuration
+#### 2. Update the VirtualHost / site configuration
 
 Open:
 
@@ -89,7 +90,7 @@ And make sure it contains:
 </VirtualHost>
 ```
 
-### 3. Create the .htaccess file
+#### 3. Create the .htaccess file
 
 Place it at:
 
