@@ -163,16 +163,16 @@ class UserService
 
         if (isset($data['ins_expires_at'])) {
             $stmt = $this->db->prepare(
-                "INSERT INTO insurances (user_id, started_at, expires_at, payment)
-                 VALUES (:user_id, :started_at, :expires_at, :payment)
+                "INSERT INTO insurances (user_id, issued_at, expires_at, payment)
+                 VALUES (:user_id, :issued_at, :expires_at, :payment)
                  ON CONFLICT(user_id) DO UPDATE SET
-                     started_at = excluded.started_at,
+                     issued_at = excluded.issued_at,
                      expires_at = excluded.expires_at,
                      payment    = excluded.payment"
             );
             $stmt->execute([
                 ':user_id' => $id,
-                ':started_at' => $currentDate,
+                ':issued_at' => $currentDate,
                 ':expires_at' => $data['ins_expires_at'],
                 ':payment' => $data['ins_payment'] ?? 0,
             ]);
